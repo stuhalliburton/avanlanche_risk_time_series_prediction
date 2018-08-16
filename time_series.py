@@ -90,7 +90,7 @@ model.add(Dense(1, activation='linear'))
 model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
 
 # fit model to dataset
-model.fit(x_train, y_train, epochs=100, batch_size=32, validation_split=None)
+model.fit(x_train, y_train, epochs=100, batch_size=32, validation_split=0.1)
 
 # make predictions
 train_predict = model.predict(x_train)
