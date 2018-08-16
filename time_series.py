@@ -42,27 +42,29 @@ def numerical_labels(data):
     if data == 'High':
         return 4
 
-def create_dataset(dataset, look_back=1, label_index=None):
+def create_dataset(dataset, look_back=1):
     x, y = [], []
-    for index, value in enumerate(dataset):
-        try:
-            current_index = index + 1
-            dataframe_index = current_index + 1
-            look_back_index = dataframe_index + look_back
-            if look_back_index > len(dataset):
-                raise IndexError
-            previous = dataset[dataframe_index:look_back_index]
-            prediction = dataset[current_index][label_index]
-            x.append(previous)
-            y.append(prediction)
-        except IndexError:
-            pass
+    label_index = dataset.columns.get_loc(observed_hazard)
+    values = dataset.values
 
-    return np.array(x), np.array(y)
+    for index, value in enumerate(values):
+        next_index = index + 1
+        look_back_index = next_index + look_back
+        if look_back_index > len(values):
+            break
+
+        previous = values[next_index:look_back_index]
+        prediction = values[index][label_index]
+        x.append(previous)
+        y.append(prediction)
+
+    x = np.array(x)
+    x = x.reshape(x.shape[0], 1, look_back*feature_count)
+    y = np.array(y)
+    return x, y
 
 # load CSV data with specific feature columns
 dataset = pd.read_csv(file_name, index_col=False, usecols=features, skipinitialspace=True)
-label_index = dataset.columns.get_loc(observed_hazard)
 
 # backfill missing values with earlier values
 dataset = dataset.fillna(method='bfill')
@@ -77,13 +79,8 @@ dataset[observed_hazard] = dataset[observed_hazard].apply(numerical_labels)
 train, test = train_test_split(dataset, test_size=0.1, shuffle=False)
 
 # create time seriesed dataset and reshape
-x_train, y_train = create_dataset(train.values, look_back=look_back,
-        label_index=label_index)
-x_train = x_train.reshape(x_train.shape[0], 1, look_back*feature_count)
-
-x_test, y_test = create_dataset(test.values, look_back=look_back,
-        label_index=label_index)
-x_test = x_test.reshape(x_test.shape[0], 1, look_back*feature_count)
+x_train, y_train = create_dataset(train, look_back=look_back)
+x_test, y_test = create_dataset(test, look_back=look_back)
 
 # specify model and compile
 model = Sequential()
