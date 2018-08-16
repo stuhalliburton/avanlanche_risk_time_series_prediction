@@ -74,16 +74,16 @@ dataset = dataset.dropna(subset=features)
 dataset[observed_hazard] = dataset[observed_hazard].apply(numerical_labels)
 
 # split train / test data
-train, test = train_test_split(dataset, test_size=0., shuffle=False)
+train, test = train_test_split(dataset, test_size=0.1, shuffle=False)
 
 # create time seriesed dataset and reshape
 x_train, y_train = create_dataset(train.values, look_back=look_back,
         label_index=label_index)
 x_train = x_train.reshape(x_train.shape[0], 1, look_back*feature_count)
 
-# x_test, y_test = create_dataset(test, look_back=look_back,
-#         label_index=label_index)
-# x_test = x_test.reshape(x_test.shape[0], 1, look_back*feature_count)
+x_test, y_test = create_dataset(test.values, look_back=look_back,
+        label_index=label_index)
+x_test = x_test.reshape(x_test.shape[0], 1, look_back*feature_count)
 
 # specify model and compile
 model = Sequential()
@@ -97,11 +97,19 @@ model.fit(x_train, y_train, epochs=100, batch_size=32, validation_split=None)
 
 # make predictions
 train_predict = model.predict(x_train)
-# test_predict = model.predict(x_test)
+test_predict = model.predict(x_test)
 
+# plot predictions
+fig = plt.figure()
+
+plt.subplot(211)
 plt.plot(y_train, label='y_train')
 plt.plot(train_predict, label='train_predict')
-# plt.plot(y_test, label='y_test')
-# plt.plot(test_predict, label='test_predict')
 plt.legend()
+
+plt.subplot(212)
+plt.plot(y_test, label='y_test')
+plt.plot(test_predict, label='test_predict')
+plt.legend()
+
 plt.show()
