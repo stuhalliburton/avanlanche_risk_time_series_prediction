@@ -94,21 +94,32 @@ model.add(Dense(1, activation='linear'))
 model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
 
 # fit model to dataset
-model.fit(x_train, y_train, epochs=100, batch_size=32, validation_split=0.1)
+training = model.fit(x_train, y_train, epochs=500, batch_size=32, validation_split=0.1)
 
 # make predictions
 train_predict = model.predict(x_train)
 test_predict = model.predict(x_test)
 
-# plot predictions
+# plots figures
 fig = plt.figure()
 
-plt.subplot(211)
+# plot training metrics
+plt.subplot(221)
+plt.plot(training.history['acc'], label='acc')
+plt.plot(training.history['val_acc'], label='val_acc')
+plt.legend()
+plt.subplot(222)
+plt.plot(training.history['loss'], label='loss')
+plt.plot(training.history['val_loss'], label='val_loss')
+plt.legend()
+
+# plot predictions
+plt.subplot(223)
 plt.plot(y_train, label='y_train')
 plt.plot(train_predict, label='train_predict')
 plt.legend()
 
-plt.subplot(212)
+plt.subplot(224)
 plt.plot(y_test, label='y_test')
 plt.plot(test_predict, label='test_predict')
 plt.legend()
