@@ -18,15 +18,18 @@ observed_hazard = 'Observed aval. hazard'
 temp_gradient = 'Max Temp Grad'
 hardness_gradient = 'Max Hardness Grad'
 snow_depth = 'Total Snow Depth'
-
-snow_temp = 'Snow Temp'
+drift = 'Drift'
+foot_pen = 'Foot Pen'
+rain_at_900 = 'Rain at 900'
+summit_air_temp = 'Summit Air Temp'
+summit_wind_speed = 'Summit Wind Speed'
 no_settle = 'No Settle'
 insolation = 'Insolation'
-foot_pen = 'Foot Pen'
-ski_pen = 'Ski Pen'
-drift = 'Drift'
+snow_temp = 'Snow Temp'
 
-features = [observed_hazard, temp_gradient, hardness_gradient, snow_depth]
+features = [observed_hazard, temp_gradient, hardness_gradient, snow_depth, drift,
+        foot_pen, rain_at_900, summit_air_temp, summit_wind_speed, no_settle,
+        insolation, snow_temp]
 feature_count = len(features)
 look_back = 7
 
@@ -48,20 +51,18 @@ def create_dataset(dataset, look_back=1):
     values = dataset.values
 
     for index, value in enumerate(values):
-        next_index = index + 1
-        look_back_index = next_index + look_back
-        if look_back_index > len(values):
-            break
+        if index < look_back:
+            continue
 
-        previous = values[next_index:look_back_index]
-        prediction = values[index][label_index]
+        look_back_index = index - look_back
+
+        previous = values[look_back_index:index]
+        prediction = value[label_index]
+
         x.append(previous)
         y.append(prediction)
 
-    x = np.array(x)
-    x = x.reshape(x.shape[0], 1, look_back*feature_count)
-    y = np.array(y)
-    return x, y
+    return np.array(x), np.array(y)
 
 # load CSV data with specific feature columns
 dataset = pd.read_csv(file_name, index_col=False, usecols=features, skipinitialspace=True)
@@ -74,6 +75,9 @@ dataset = dataset.dropna(subset=features)
 
 # numerical risk values
 dataset[observed_hazard] = dataset[observed_hazard].apply(numerical_labels)
+
+# reverse dataset
+dataset = dataset.iloc[::-1]
 
 # split train / test data
 train, test = train_test_split(dataset, test_size=0.1, shuffle=False)
