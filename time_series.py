@@ -14,6 +14,7 @@ file_name = 'profiles/southern-cairngorms.csv'
 # file_name = 'profiles/lochaber.csv'
 # file_name = 'profiles/creag-meagaidh.csv'
 
+# dataset columns
 observed_hazard = 'Observed aval. hazard'
 temp_gradient = 'Max Temp Grad'
 hardness_gradient = 'Max Hardness Grad'
@@ -23,13 +24,29 @@ foot_pen = 'Foot Pen'
 rain_at_900 = 'Rain at 900'
 summit_air_temp = 'Summit Air Temp'
 summit_wind_speed = 'Summit Wind Speed'
+summit_wind_dir = 'Summit Wind Dir'
 no_settle = 'No Settle'
 insolation = 'Insolation'
 snow_temp = 'Snow Temp'
 
+# derived features
+summit_wind_dir_n = 'Summit Wind Dir_n'
+summit_wind_dir_ne = 'Summit Wind Dir_ne'
+summit_wind_dir_e = 'Summit Wind Dir_e'
+summit_wind_dir_se = 'Summit Wind Dir_se'
+summit_wind_dir_s = 'Summit Wind Dir_s'
+summit_wind_dir_sw = 'Summit Wind Dir_sw'
+summit_wind_dir_w = 'Summit Wind Dir_w'
+summit_wind_dir_nw = 'Summit Wind Dir_nw'
+
+columns = [observed_hazard, temp_gradient, hardness_gradient, snow_depth, drift,
+        foot_pen, rain_at_900, summit_air_temp, summit_wind_speed,
+        summit_wind_dir, no_settle, insolation, snow_temp]
 features = [observed_hazard, temp_gradient, hardness_gradient, snow_depth, drift,
         foot_pen, rain_at_900, summit_air_temp, summit_wind_speed, no_settle,
-        insolation, snow_temp]
+        insolation, snow_temp, summit_wind_dir_n, summit_wind_dir_ne,
+        summit_wind_dir_e, summit_wind_dir_se, summit_wind_dir_s,
+        summit_wind_dir_sw, summit_wind_dir_w, summit_wind_dir_nw]
 feature_count = len(features)
 look_back = 7
 
@@ -44,6 +61,27 @@ def numerical_labels(data):
         return 3
     if data == 'High':
         return 4
+
+def bearing_classification(bearing):
+    if 0 <= bearing <= 22.5:
+        return 'n'
+    if 337.6 <= bearing <= 360:
+        return 'n'
+    if 22.6 <= bearing <= 67.5:
+        return 'ne'
+    if 67.6 <= bearing <= 112.5:
+        return 'e'
+    if 112.6 <= bearing <= 157.5:
+        return 'se'
+    if 157.6 <= bearing <= 202.5:
+        return 's'
+    if 202.6 <= bearing <= 247.5:
+        return 'sw'
+    if 247.6 <= bearing <= 292.5:
+        return 'w'
+    if 292.6 <= bearing <= 337.5:
+        return 'nw'
+    return np.nan
 
 def create_dataset(dataset, look_back=1):
     x, y = [], []
@@ -65,16 +103,20 @@ def create_dataset(dataset, look_back=1):
     return np.array(x), np.array(y)
 
 # load CSV data with specific feature columns
-dataset = pd.read_csv(file_name, index_col=False, usecols=features, skipinitialspace=True)
+dataset = pd.read_csv(file_name, index_col=False, usecols=columns, skipinitialspace=True)
 
 # backfill missing values with earlier values
 dataset = dataset.fillna(method='bfill')
 
 # drop remaining un-backfillable rows
-dataset = dataset.dropna(subset=features)
+dataset = dataset.dropna(subset=columns)
 
 # numerical risk values
 dataset[observed_hazard] = dataset[observed_hazard].apply(numerical_labels)
+
+# encode bearing values
+dataset[summit_wind_dir] = dataset[summit_wind_dir].apply(bearing_classification)
+dataset = pd.get_dummies(dataset, columns=[summit_wind_dir])
 
 # reverse dataset
 dataset = dataset.iloc[::-1]
