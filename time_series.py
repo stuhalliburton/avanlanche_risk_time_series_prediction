@@ -134,13 +134,12 @@ x_test, y_test = create_dataset(test, look_back=look_back, randomise=False)
 
 # specify model and compile
 model = Sequential()
-model.add(LSTM(512, activation='relu', return_sequences=True, input_shape=x_train[0].shape))
-model.add(LSTM(512, activation='tanh'))
-model.add(Dense(1, activation='linear'))
+model.add(LSTM(16, activation='tanh', input_shape=x_train[0].shape))
+model.add(Dense(1, activation='relu'))
 model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
 
 # fit model to dataset
-training = model.fit(x_train, y_train, epochs=500, batch_size=32, validation_split=0.1)
+training = model.fit(x_train, y_train, epochs=400, batch_size=32, validation_split=0.1)
 
 # make predictions
 train_predict = model.predict(x_train)
