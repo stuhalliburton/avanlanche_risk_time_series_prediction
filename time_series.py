@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
+from sklearn.utils import shuffle
 
 from keras.models import Sequential
 from keras.layers import Dense, LSTM
@@ -83,7 +84,7 @@ def bearing_classification(bearing):
         return 'nw'
     return np.nan
 
-def create_dataset(dataset, look_back=1):
+def create_dataset(dataset, look_back=1, randomise=False):
     x, y = [], []
     label_index = dataset.columns.get_loc(observed_hazard)
     values = dataset.values
@@ -99,6 +100,9 @@ def create_dataset(dataset, look_back=1):
 
         x.append(previous)
         y.append(prediction)
+
+    if randomise == True:
+        x, y = shuffle(x, y)
 
     return np.array(x), np.array(y)
 
@@ -125,8 +129,8 @@ dataset = dataset.iloc[::-1]
 train, test = train_test_split(dataset, test_size=0.1, shuffle=False)
 
 # create time seriesed dataset and reshape
-x_train, y_train = create_dataset(train, look_back=look_back)
-x_test, y_test = create_dataset(test, look_back=look_back)
+x_train, y_train = create_dataset(train, look_back=look_back, randomise=True)
+x_test, y_test = create_dataset(test, look_back=look_back, randomise=False)
 
 # specify model and compile
 model = Sequential()
