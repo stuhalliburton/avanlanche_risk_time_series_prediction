@@ -69,7 +69,7 @@ def bearing_classification(bearing):
         return 'w'
     if 292.6 <= bearing <= 337.5:
         return 'nw'
-    return np.nan
+    return 'no wind'
 
 def create_dataset(dataset, look_back=1, randomise=False):
     x, y = [], []
@@ -97,7 +97,7 @@ def create_dataset(dataset, look_back=1, randomise=False):
 dataset = pd.read_csv(file_name, index_col=False, usecols=columns, skipinitialspace=True)
 
 # backfill missing values with earlier values
-dataset = dataset.fillna(method='bfill')
+# dataset = dataset.fillna(method='bfill')
 
 # drop remaining un-backfillable rows
 dataset = dataset.dropna(subset=columns)
@@ -132,7 +132,7 @@ model.add(Dense(1, activation='relu'))
 model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
 
 # fit model to dataset
-training = model.fit(x_train, y_train, epochs=400, batch_size=1, validation_split=0.05)
+training = model.fit(x_train, y_train, epochs=400, batch_size=32, validation_split=0.05)
 
 # evaluate model against test dataset
 scores = model.evaluate(x_test, y_test)
