@@ -96,12 +96,6 @@ def create_dataset(dataset, look_back=1, randomise=False):
 # load CSV data with specific feature columns
 dataset = pd.read_csv(file_name, index_col=False, usecols=columns, skipinitialspace=True)
 
-# backfill missing values with earlier values
-# dataset = dataset.fillna(method='bfill')
-
-# drop remaining un-backfillable rows
-dataset = dataset.dropna(subset=columns)
-
 # numerical risk values
 dataset[observed_hazard] = dataset[observed_hazard].apply(numerical_labels)
 
@@ -114,6 +108,13 @@ dataset = pd.get_dummies(dataset, columns=[precip_code])
 
 # encode crystal type
 dataset = pd.get_dummies(dataset, columns=[crystals])
+
+# backfill missing values with earlier values
+dataset = dataset.fillna(method='bfill')
+
+# drop remaining un-backfillable rows
+dataset = dataset.dropna()
+
 
 # reverse dataset
 dataset = dataset.iloc[::-1]
