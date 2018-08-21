@@ -29,6 +29,7 @@ summit_wind_dir = 'Summit Wind Dir'
 no_settle = 'No Settle'
 insolation = 'Insolation'
 snow_temp = 'Snow Temp'
+precip_code = 'Precip Code'
 
 # derived features
 summit_wind_dir_n = 'Summit Wind Dir_n'
@@ -39,16 +40,16 @@ summit_wind_dir_s = 'Summit Wind Dir_s'
 summit_wind_dir_sw = 'Summit Wind Dir_sw'
 summit_wind_dir_w = 'Summit Wind Dir_w'
 summit_wind_dir_nw = 'Summit Wind Dir_nw'
+precip_code_0 = 'Precip Code_0 - None'
+precip_code_2 = 'Precip Code_2 - Trace'
+precip_code_4 = 'Precip Code_4 - Light Showers'
+precip_code_6 = 'Precip Code_6 - Snow Showers'
+precip_code_8 = 'Precip Code_8 - Snow'
+precip_code_10 = 'Precip Code_10 - Heavy Snow'
 
 columns = [observed_hazard, temp_gradient, hardness_gradient, snow_depth, drift,
         foot_pen, rain_at_900, summit_air_temp, summit_wind_speed,
-        summit_wind_dir, no_settle, insolation, snow_temp]
-features = [observed_hazard, temp_gradient, hardness_gradient, snow_depth, drift,
-        foot_pen, rain_at_900, summit_air_temp, summit_wind_speed, no_settle,
-        insolation, snow_temp, summit_wind_dir_n, summit_wind_dir_ne,
-        summit_wind_dir_e, summit_wind_dir_se, summit_wind_dir_s,
-        summit_wind_dir_sw, summit_wind_dir_w, summit_wind_dir_nw]
-feature_count = len(features)
+        summit_wind_dir, no_settle, insolation, snow_temp, precip_code]
 look_back = 7
 
 def numerical_labels(data):
@@ -89,14 +90,14 @@ def create_dataset(dataset, look_back=1, randomise=False):
     label_index = dataset.columns.get_loc(observed_hazard)
     values = dataset.values
 
-    for index, value in enumerate(values):
+    for index, row in enumerate(values):
         if index < look_back:
             continue
 
         look_back_index = index - look_back
 
         previous = values[look_back_index:index]
-        prediction = value[label_index]
+        prediction = row[label_index]
 
         x.append(previous)
         y.append(prediction)
@@ -121,6 +122,9 @@ dataset[observed_hazard] = dataset[observed_hazard].apply(numerical_labels)
 # encode bearing values
 dataset[summit_wind_dir] = dataset[summit_wind_dir].apply(bearing_classification)
 dataset = pd.get_dummies(dataset, columns=[summit_wind_dir])
+
+# encode precipitation codes
+dataset = pd.get_dummies(dataset, columns=[precip_code])
 
 # reverse dataset
 dataset = dataset.iloc[::-1]
