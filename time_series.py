@@ -130,7 +130,7 @@ dataset = pd.get_dummies(dataset, columns=[precip_code])
 dataset = dataset.iloc[::-1]
 
 # split train / test data
-train, test = train_test_split(dataset, test_size=0.1, shuffle=False)
+train, test = train_test_split(dataset, test_size=0.05, shuffle=False)
 
 # create time seriesed dataset and reshape
 x_train, y_train = create_dataset(train, look_back=look_back, randomise=True)
@@ -143,7 +143,11 @@ model.add(Dense(1, activation='relu'))
 model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
 
 # fit model to dataset
-training = model.fit(x_train, y_train, epochs=400, batch_size=32, validation_split=0.1)
+training = model.fit(x_train, y_train, epochs=400, batch_size=1, validation_split=0.05)
+
+# evaluate model against test dataset
+scores = model.evaluate(x_test, y_test)
+print 'Test Loss: {}, Test Accuracy {}'.format(scores[0], scores[1])
 
 # make predictions
 train_predict = model.predict(x_train)
