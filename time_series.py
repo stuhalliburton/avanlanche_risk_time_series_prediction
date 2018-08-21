@@ -30,26 +30,12 @@ no_settle = 'No Settle'
 insolation = 'Insolation'
 snow_temp = 'Snow Temp'
 precip_code = 'Precip Code'
-
-# derived features
-summit_wind_dir_n = 'Summit Wind Dir_n'
-summit_wind_dir_ne = 'Summit Wind Dir_ne'
-summit_wind_dir_e = 'Summit Wind Dir_e'
-summit_wind_dir_se = 'Summit Wind Dir_se'
-summit_wind_dir_s = 'Summit Wind Dir_s'
-summit_wind_dir_sw = 'Summit Wind Dir_sw'
-summit_wind_dir_w = 'Summit Wind Dir_w'
-summit_wind_dir_nw = 'Summit Wind Dir_nw'
-precip_code_0 = 'Precip Code_0 - None'
-precip_code_2 = 'Precip Code_2 - Trace'
-precip_code_4 = 'Precip Code_4 - Light Showers'
-precip_code_6 = 'Precip Code_6 - Snow Showers'
-precip_code_8 = 'Precip Code_8 - Snow'
-precip_code_10 = 'Precip Code_10 - Heavy Snow'
+crystals = 'Crystals'
 
 columns = [observed_hazard, temp_gradient, hardness_gradient, snow_depth, drift,
         foot_pen, rain_at_900, summit_air_temp, summit_wind_speed,
-        summit_wind_dir, no_settle, insolation, snow_temp, precip_code]
+        summit_wind_dir, no_settle, insolation, snow_temp, precip_code,
+        crystals]
 look_back = 7
 
 def numerical_labels(data):
@@ -125,6 +111,9 @@ dataset = pd.get_dummies(dataset, columns=[summit_wind_dir])
 
 # encode precipitation codes
 dataset = pd.get_dummies(dataset, columns=[precip_code])
+
+# encode crystal type
+dataset = pd.get_dummies(dataset, columns=[crystals])
 
 # reverse dataset
 dataset = dataset.iloc[::-1]
