@@ -72,20 +72,19 @@ def bearing_classification(bearing):
     return 'no wind'
 
 def create_dataset(dataset, look_back=1, randomise=False):
+    dataset = dataset.reset_index(drop=True)
     x, y = [], []
-    label_index = dataset.columns.get_loc(observed_hazard)
-    values = dataset.values
 
-    for index, row in enumerate(values):
+    for index, row in dataset.iterrows():
         if index < look_back:
             continue
 
         look_back_index = index - look_back
 
-        previous = values[look_back_index:index]
-        prediction = row[label_index]
+        previous = dataset[look_back_index:index]
+        prediction = row[observed_hazard]
 
-        x.append(previous)
+        x.append(previous.values)
         y.append(prediction)
 
     if randomise == True:
@@ -114,7 +113,6 @@ dataset = dataset.fillna(method='bfill')
 
 # drop remaining un-backfillable rows
 dataset = dataset.dropna()
-
 
 # reverse dataset
 dataset = dataset.iloc[::-1]
