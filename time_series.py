@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 
 from keras.models import Sequential
-from keras.layers import Dense, LSTM
+from keras.layers import Dense, LSTM, Conv1D, MaxPooling1D
 
 file_name = 'profiles/southern-cairngorms.csv'
 # file_name = 'profiles/northern-cairngorms.csv'
@@ -142,12 +142,15 @@ x_test, y_test = create_dataset(test, look_back=look_back, randomise=False)
 
 # specify model and compile
 model = Sequential()
+# model.add(Conv1D(32, 1, activation='relu', input_shape=x_train[0].shape))
+# model.add(MaxPooling1D(pool_size=2))
+# model.add(LSTM(16, activation='tanh'))
 model.add(LSTM(16, activation='tanh', input_shape=x_train[0].shape))
 model.add(Dense(1, activation='relu'))
 model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
 
 # fit model to dataset
-training = model.fit(x_train, y_train, epochs=400, batch_size=32, validation_split=0.05)
+training = model.fit(x_train, y_train, epochs=300, batch_size=32, validation_split=0.05)
 
 # evaluate model against test dataset
 scores = model.evaluate(x_test, y_test)
