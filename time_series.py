@@ -32,10 +32,23 @@ snow_temp = 'Snow Temp'
 precip_code = 'Precip Code'
 crystals = 'Crystals'
 
-columns = [observed_hazard, temp_gradient, hardness_gradient, snow_depth, drift,
-        foot_pen, rain_at_900, summit_air_temp, summit_wind_speed,
-        summit_wind_dir, no_settle, insolation, snow_temp, precip_code,
-        crystals]
+columns = [
+        observed_hazard,
+        temp_gradient,
+        hardness_gradient,
+        # snow_depth,
+        # drift,
+        # foot_pen,
+        # rain_at_900,
+        # summit_air_temp,
+        # summit_wind_speed,
+        # summit_wind_dir,
+        # no_settle,
+        # insolation,
+        # snow_temp,
+        # precip_code,
+        # crystals
+        ]
 look_back = 7
 
 def numerical_labels(data):
@@ -99,20 +112,23 @@ dataset = pd.read_csv(file_name, index_col=False, usecols=columns, skipinitialsp
 dataset[observed_hazard] = dataset[observed_hazard].apply(numerical_labels)
 
 # encode bearing values
-dataset[summit_wind_dir] = dataset[summit_wind_dir].apply(bearing_classification)
-dataset = pd.get_dummies(dataset, columns=[summit_wind_dir])
+# dataset[summit_wind_dir] = dataset[summit_wind_dir].apply(bearing_classification)
+# dataset = pd.get_dummies(dataset, columns=[summit_wind_dir])
 
 # encode precipitation codes
-dataset = pd.get_dummies(dataset, columns=[precip_code])
+# dataset = pd.get_dummies(dataset, columns=[precip_code])
 
 # encode crystal type
-dataset = pd.get_dummies(dataset, columns=[crystals])
+# dataset = pd.get_dummies(dataset, columns=[crystals])
 
 # backfill missing values with earlier values
 dataset = dataset.fillna(method='bfill')
 
 # drop remaining un-backfillable rows
-dataset = dataset.dropna()
+# dataset = dataset.dropna()
+
+# debug csv
+# dataset.to_csv('./dataframe.csv', sep='\t', encoding='utf-8')
 
 # reverse dataset
 dataset = dataset.iloc[::-1]
