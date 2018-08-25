@@ -3,7 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
-from sklearn.utils import shuffle
 
 from keras.models import Sequential
 from keras.layers import Dense, LSTM, Conv1D
@@ -84,7 +83,7 @@ def bearing_classification(bearing):
         return 'nw'
     return 'no wind'
 
-def create_dataset(dataset, look_back=1, randomise=False):
+def create_dataset(dataset, look_back=1):
     dataset = dataset.reset_index(drop=True)
     x, y = [], []
 
@@ -99,9 +98,6 @@ def create_dataset(dataset, look_back=1, randomise=False):
 
         x.append(previous.values)
         y.append(prediction)
-
-    if randomise == True:
-        x, y = shuffle(x, y)
 
     return np.array(x), np.array(y)
 
@@ -135,12 +131,11 @@ dataset = dataset.fillna(0)
 # reverse dataset
 dataset = dataset.iloc[::-1]
 
-# split train / test data
-train, test = train_test_split(dataset, test_size=0.05, shuffle=False)
-
 # create time seriesed dataset and reshape
-x_train, y_train = create_dataset(train, look_back=look_back, randomise=True)
-x_test, y_test = create_dataset(test, look_back=look_back, randomise=False)
+X, Y = create_dataset(dataset, look_back=look_back)
+
+# split train / test data
+x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.05, shuffle=False)
 
 # specify model and compile
 model = Sequential()
