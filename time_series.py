@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 
 from keras.models import Sequential
-from keras.layers import Dense, LSTM, Conv1D, MaxPooling1D
+from keras.layers import Dense, LSTM, Conv1D
 
 file_name = 'profiles/southern-cairngorms.csv'
 # file_name = 'profiles/northern-cairngorms.csv'
@@ -33,22 +33,22 @@ precip_code = 'Precip Code'
 crystals = 'Crystals'
 
 columns = [
-        observed_hazard,
-        temp_gradient,
-        hardness_gradient,
-        # snow_depth,
-        # drift,
-        # foot_pen,
-        # rain_at_900,
-        # summit_air_temp,
-        # summit_wind_speed,
-        # summit_wind_dir,
-        # no_settle,
-        # insolation,
-        # snow_temp,
-        # precip_code,
-        # crystals
-        ]
+    observed_hazard,
+    temp_gradient,
+    hardness_gradient,
+    snow_depth,
+    drift,
+    foot_pen,
+    rain_at_900,
+    summit_air_temp,
+    summit_wind_speed,
+    summit_wind_dir,
+    no_settle,
+    insolation,
+    snow_temp,
+    precip_code,
+    crystals
+]
 look_back = 7
 
 def numerical_labels(data):
@@ -112,17 +112,19 @@ dataset = pd.read_csv(file_name, index_col=False, usecols=columns, skipinitialsp
 dataset[observed_hazard] = dataset[observed_hazard].apply(numerical_labels)
 
 # encode bearing values
-# dataset[summit_wind_dir] = dataset[summit_wind_dir].apply(bearing_classification)
-# dataset = pd.get_dummies(dataset, columns=[summit_wind_dir])
+dataset[summit_wind_dir] = dataset[summit_wind_dir].apply(bearing_classification)
+dataset = pd.get_dummies(dataset, columns=[summit_wind_dir])
 
 # encode precipitation codes
-# dataset = pd.get_dummies(dataset, columns=[precip_code])
+dataset = pd.get_dummies(dataset, columns=[precip_code])
 
 # encode crystal type
-# dataset = pd.get_dummies(dataset, columns=[crystals])
+dataset = pd.get_dummies(dataset, columns=[crystals])
 
 # backfill missing values with earlier values
-dataset = dataset.fillna(method='bfill')
+# dataset = dataset.fillna(method='bfill')
+# fill missing values with zeros
+dataset = dataset.fillna(0)
 
 # drop remaining un-backfillable rows
 # dataset = dataset.dropna()
@@ -142,10 +144,11 @@ x_test, y_test = create_dataset(test, look_back=look_back, randomise=False)
 
 # specify model and compile
 model = Sequential()
-# model.add(Conv1D(32, 1, activation='relu', input_shape=x_train[0].shape))
-# model.add(MaxPooling1D(pool_size=2))
-# model.add(LSTM(16, activation='tanh'))
-model.add(LSTM(16, activation='tanh', input_shape=x_train[0].shape))
+model.add(LSTM(32, activation='tanh', return_sequences=True, input_shape=x_train[0].shape))
+model.add(Conv1D(32, 1, activation='relu'))
+model.add(LSTM(16, activation='tanh', return_sequences=True))
+model.add(Conv1D(16, 1, activation='relu'))
+model.add(LSTM(8, activation='tanh'))
 model.add(Dense(1, activation='relu'))
 model.compile(loss='mse', optimizer='adam', metrics=['accuracy'])
 
