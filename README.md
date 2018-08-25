@@ -21,5 +21,5 @@ Open file in Vim and remove '=' signs.
 Train the network using time series prediction.
 
 ```bash
-python time_series.py
+python main.py
 ```
