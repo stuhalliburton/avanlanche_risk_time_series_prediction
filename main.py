@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from data_formatter import DataFormatter
-from neural_network import NeuralNetwork
+from lib.data_formatter import DataFormatter
+from lib.neural_network import NeuralNetwork
 
 # create time seriesed dataset
 X, Y = DataFormatter().create_dataset(look_back=7)

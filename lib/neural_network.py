@@ -4,6 +4,7 @@ from keras.layers import Dense, LSTM, Conv1D
 class NeuralNetwork:
     def __init__(self, input_shape):
         model = Sequential()
+        # model.add(LSTM(32, activation='tanh', input_shape=input_shape))
         model.add(LSTM(32, activation='tanh', return_sequences=True,
             input_shape=input_shape))
         model.add(Conv1D(32, 1, activation='relu'))

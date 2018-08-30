@@ -7,13 +7,14 @@ class DataFormatter:
         'Observed aval. hazard',
         'Max Temp Grad',
         'Max Hardness Grad',
-        'Total Snow Depth',
-        # 'Snow Temp',
-        # 'Foot Pen',
-        # 'Drift',
-        # 'No Settle',
-        # 'Insolation',
-        # 'Rain at 900',
+        # 'Total Snow Depth',
+        'Drift',
+        'Snow Temp',
+        'Foot Pen',
+        'No Settle',
+        'Insolation',
+        'Rain at 900',
+        # 'Air Temp',
         # 'Summit Air Temp',
         # 'Summit Wind Speed',
         # 'Summit Wind Dir',
@@ -21,6 +22,11 @@ class DataFormatter:
         # 'Crystals'
     ]
     LABEL = 'Observed aval. hazard'
+    TEMP_GRAD = 'Max Temp Grad'
+    HARD_GRAD = 'Max Hardness Grad'
+    INSOLATION = 'Insolation'
+    SNOW_TEMP = 'Snow Temp'
+    FOOT_PEN = 'Foot Pen'
 
     def create_dataset(self, look_back=1):
         x, y = [], []
@@ -30,13 +36,22 @@ class DataFormatter:
                 path = root + file_path
                 dataset = pd.read_csv(path, index_col=False, usecols=self.COLUMNS, skipinitialspace=True)
                 dataset[self.LABEL] = dataset[self.LABEL].apply(self._numerical_labels)
-                # dataset[summit_wind_dir] = dataset[summit_wind_dir].apply(self._bearing_classification)
-                # dataset = pd.get_dummies(dataset, columns=[summit_wind_dir])
-                # dataset = pd.get_dummies(dataset, columns=[precip_code])
-                # dataset = pd.get_dummies(dataset, columns=[crystals])
-                # dataset = dataset.fillna(method='bfill')
-                dataset = dataset.fillna(0)
-                # dataset = dataset.dropna()
+
+                dataset[self.TEMP_GRAD] = dataset[self.TEMP_GRAD].fillna(method='bfill')
+                dataset = dataset.dropna(subset=[self.TEMP_GRAD])
+
+                dataset[self.HARD_GRAD] = dataset[self.HARD_GRAD].fillna(method='bfill')
+                dataset = dataset.dropna(subset=[self.HARD_GRAD])
+
+                dataset[self.INSOLATION] = dataset[self.INSOLATION].fillna(method='bfill')
+                dataset = dataset.dropna(subset=[self.INSOLATION])
+
+                dataset[self.SNOW_TEMP] = dataset[self.SNOW_TEMP].fillna(method='bfill')
+                dataset = dataset.dropna(subset=[self.SNOW_TEMP])
+
+                dataset[self.FOOT_PEN] = dataset[self.FOOT_PEN].fillna(method='bfill')
+                dataset = dataset.dropna(subset=[self.FOOT_PEN])
+
                 dataset = dataset.iloc[::-1]
                 dataset = dataset.reset_index(drop=True)
 
@@ -62,6 +77,7 @@ class DataFormatter:
             return 3
         if data == 'High':
             return 4
+        return 0
 
     def _bearing_classification(self, bearing):
         if 0 <= bearing <= 22.5:
