@@ -7,62 +7,66 @@ class DataFormatter:
         'Observed aval. hazard',
         'Max Temp Grad',
         'Max Hardness Grad',
-        # 'Total Snow Depth',
+        'Total Snow Depth',
         'Drift',
         'Snow Temp',
         'Foot Pen',
         'No Settle',
         'Insolation',
         'Rain at 900',
-        # 'Air Temp',
-        # 'Summit Air Temp',
-        # 'Summit Wind Speed',
-        # 'Summit Wind Dir',
-        # 'Precip Code',
-        # 'Crystals'
+        'Air Temp',
+        'Wind Dir',
+        'Wind Speed',
+        'Summit Air Temp',
+        'Summit Wind Speed',
+        'Summit Wind Dir',
+        'Precip Code',
+        'Crystals',
+        'Wetness'
     ]
     LABEL = 'Observed aval. hazard'
-    TEMP_GRAD = 'Max Temp Grad'
-    HARD_GRAD = 'Max Hardness Grad'
-    INSOLATION = 'Insolation'
-    SNOW_TEMP = 'Snow Temp'
-    FOOT_PEN = 'Foot Pen'
+    WIND_DIR = 'Wind Dir'
+    SUMMIT_WIND_DIR = 'Summit Wind Dir'
+    PRECIP = 'Precip Code'
+    CRYSTAL = 'Crystals'
 
     def create_dataset(self, look_back=1):
         x, y = [], []
+        datasets = []
 
         for root, dirs, files in os.walk('./profiles/southern-cairngorms/'):
             for file_path in files:
                 path = root + file_path
                 dataset = pd.read_csv(path, index_col=False, usecols=self.COLUMNS, skipinitialspace=True)
+
+                # apply numerical avalanche risk
                 dataset[self.LABEL] = dataset[self.LABEL].apply(self._numerical_labels)
+                # apply string bearings
+                dataset[self.WIND_DIR] = dataset[self.WIND_DIR].apply(self._bearing_classification)
+                dataset[self.SUMMIT_WIND_DIR] = dataset[self.SUMMIT_WIND_DIR].apply(self._bearing_classification)
 
-                dataset[self.TEMP_GRAD] = dataset[self.TEMP_GRAD].fillna(method='bfill')
-                dataset = dataset.dropna(subset=[self.TEMP_GRAD])
-
-                dataset[self.HARD_GRAD] = dataset[self.HARD_GRAD].fillna(method='bfill')
-                dataset = dataset.dropna(subset=[self.HARD_GRAD])
-
-                dataset[self.INSOLATION] = dataset[self.INSOLATION].fillna(method='bfill')
-                dataset = dataset.dropna(subset=[self.INSOLATION])
-
-                dataset[self.SNOW_TEMP] = dataset[self.SNOW_TEMP].fillna(method='bfill')
-                dataset = dataset.dropna(subset=[self.SNOW_TEMP])
-
-                dataset[self.FOOT_PEN] = dataset[self.FOOT_PEN].fillna(method='bfill')
-                dataset = dataset.dropna(subset=[self.FOOT_PEN])
+                dataset = dataset.fillna(method='bfill')
+                dataset = dataset.dropna()
 
                 dataset = dataset.iloc[::-1]
-                dataset = dataset.reset_index(drop=True)
+                dataset['file_path'] = file_path
+                datasets.append(dataset)
 
-                for index, row in dataset.iterrows():
-                    if index < look_back:
-                        continue
-                    look_back_index = index - look_back
-                    previous = dataset[look_back_index:index]
-                    prediction = row[self.LABEL]
-                    x.append(previous.values)
-                    y.append(prediction)
+        datasets = pd.concat(datasets)
+        datasets = pd.get_dummies(datasets, columns=[self.WIND_DIR,
+            self.SUMMIT_WIND_DIR, self.PRECIP, self.CRYSTAL])
+
+        for file_name, dataset in datasets.groupby('file_path'):
+            dataset = dataset.drop(columns=['file_path'])
+
+            for index, row in dataset.iterrows():
+                if index < look_back:
+                    continue
+                look_back_index = index - look_back
+                previous = dataset[look_back_index:index]
+                prediction = row[self.LABEL]
+                x.append(previous.values)
+                y.append(prediction)
 
         return np.array(x), np.array(y)
 
