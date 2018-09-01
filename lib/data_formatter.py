@@ -8,21 +8,23 @@ class DataFormatter:
         'Max Temp Grad',
         'Max Hardness Grad',
         'Total Snow Depth',
-        'Drift',
+        'Summit Air Temp',
+        'Summit Wind Speed',
+        'Summit Wind Dir',
         'Snow Temp',
+        'Drift',
         'Foot Pen',
+        'Ski Pen',
         'No Settle',
         'Insolation',
         'Rain at 900',
         'Air Temp',
         'Wind Dir',
         'Wind Speed',
-        'Summit Air Temp',
-        'Summit Wind Speed',
-        'Summit Wind Dir',
         'Precip Code',
         'Crystals',
-        'Wetness'
+        'Wetness',
+        'Cloud'
     ]
     LABEL = 'Observed aval. hazard'
     WIND_DIR = 'Wind Dir'
