@@ -30,18 +30,20 @@ class DataFormatter:
     PRECIP = 'Precip Code'
     CRYSTAL = 'Crystals'
 
-    def create_dataset(self, look_back=1):
+    def __init__(self, profiles=None):
+        self.profiles = profiles
+
         x, y = [], []
         datasets = []
 
-        for root, dirs, files in os.walk('./profiles/southern-cairngorms/'):
+        for root, dirs, files in os.walk(self.profiles):
             for file_path in files:
-                path = root + file_path
+                path = root + '/' + file_path
                 dataset = pd.read_csv(path, index_col=False, usecols=self.COLUMNS, skipinitialspace=True)
 
                 # apply numerical avalanche risk
                 dataset[self.LABEL] = dataset[self.LABEL].apply(self._numerical_labels)
-                # apply string bearings
+                # convert wind bearings to directions
                 dataset[self.WIND_DIR] = dataset[self.WIND_DIR].apply(self._bearing_classification)
                 dataset[self.SUMMIT_WIND_DIR] = dataset[self.SUMMIT_WIND_DIR].apply(self._bearing_classification)
 

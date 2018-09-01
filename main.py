@@ -3,8 +3,10 @@ from sklearn.model_selection import train_test_split
 from lib.data_formatter import DataFormatter
 from lib.neural_network import NeuralNetwork
 
-# create time seriesed dataset
-X, Y = DataFormatter().create_dataset(look_back=7)
+PROFILE_DIR = './profiles'
+
+# create time series dataset
+X, Y = DataFormatter(profiles=PROFILE_DIR).create_dataset(look_back=7)
 
 # split train / test data
 x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.05, shuffle=False)
